@@ -5,6 +5,7 @@ import com.taskmanager.services.AuthenticationService;
 import com.taskmanager.services.modelServices.TasksService;
 import com.taskmanager.viewModels.tasksVM.TasksEditVM;
 import com.taskmanager.viewModels.tasksVM.TasksListVM;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -35,8 +36,6 @@ public class TasksController {
 
     @RequestMapping(value = "edit", method = RequestMethod.GET)
     public ModelAndView edit(Integer id) {
-        TasksEditVM model = new TasksEditVM();
-
         Task task;
         if (id == null) {
             task = new Task();
@@ -48,11 +47,8 @@ public class TasksController {
             }
         }
 
-        model.setId(task.getId());
-        model.setTitle(task.getTitle());
-        model.setContent(task.getContent());
-        model.setStatus(task.getStatus());
-        model.setUserId(AuthenticationService.getLoggedUser().getId());
+        ModelMapper modelMapper = new ModelMapper();
+        TasksEditVM model = modelMapper.map(task, TasksEditVM.class);
 
         return new ModelAndView("tasks/edit");
     }
@@ -63,24 +59,11 @@ public class TasksController {
             return new ModelAndView("tasks/edit");
         }
 
-        Task task;
-        if (model.getId() == 0) {
-            task = new Task();
-        } else {
-            task = tasksService.getById(model.getId());
-            if (task == null) {
-                return new ModelAndView("redirect:list");
-            }
-        }
-
-        task.setId(model.getId());
-        task.setTitle(model.getTitle());
-        task.setContent(model.getContent());
-        task.setStatus(model.getStatus());
-        task.setUser(AuthenticationService.getLoggedUser());
+        model.setUserId(AuthenticationService.getLoggedUser().getId());
+        ModelMapper modelMapper = new ModelMapper();
+        Task task = modelMapper.map(model, Task.class);
 
         tasksService.save(task);
-
         return new ModelAndView("redirect:list");
     }
 

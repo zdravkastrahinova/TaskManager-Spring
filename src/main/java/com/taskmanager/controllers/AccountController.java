@@ -5,6 +5,7 @@ import com.taskmanager.services.AuthenticationService;
 import com.taskmanager.services.modelServices.UsersService;
 import com.taskmanager.viewModels.accountVM.AccountLoginVM;
 import com.taskmanager.viewModels.accountVM.AccountRegisterVM;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -62,15 +63,8 @@ public class AccountController {
             return new ModelAndView("account/register");
         }
 
-        User user;
-        if (model.getId() == 0) {
-            user = new User();
-        } else {
-            return new ModelAndView("redirect:login");
-        }
-
-        user.setUsername(model.getUsername());
-        user.setPassword(model.getPassword());
+        ModelMapper modelMapper = new ModelMapper();
+        User user = modelMapper.map(model, User.class);
 
         usersService.save(user);
         return new ModelAndView("redirect:login");
